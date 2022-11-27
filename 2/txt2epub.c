@@ -38,7 +38,7 @@ int main (int argc, char* argv[]) {
             execlp("pandoc", "pandoc", argv[i], "-o", files[i - 1], "--quiet", NULL); // convert file to epub
 
             fprintf(stderr, "%s: could not convert file to epub %s\n", argv[0], strerror(errno)); 
-            exit(EXIT_FAILURE); 
+            return EXIT_FAILURE;
         }
     }
 
@@ -49,6 +49,45 @@ int main (int argc, char* argv[]) {
 
         if (status < 0) { 
             fprintf(stderr, "%s: waitpid errors: %s\n", argv[0], strerror(errno));
+            return EXIT_FAILURE;
+        }
+    }
+
+    // Zip all epub files
+
+    pid_t zip_pid = fork();
+
+    if (zip_pid < 0) {
+        fprintf(stderr, "%s: error forking process %s\n", argv[0], strerror(errno));
+        return EXIT_FAILURE;
+    }
+    
+    else if (zip_pid == 0) {
+        char* zip[argc + 4];
+        zip[0] = "zip"; // command to use in execvp
+        zip[1] = "ebooks.zip";
+
+        for (int i = 0; i < argc - 1; i++) {
+            zip[i + 2] = malloc (strlen(files[i]) + 1);
+            strcpy(zip[i + 2], files[i]); // copy filename
+        }
+
+        zip[argc+2] = "-q"; // quiet flag
+        zip[argc+3] = NULL;
+
+        execvp(zip[0] /*command*/, zip);
+        
+        // if execvp fails
+        fprintf(stderr, "%s: could not zip files %s\n", argv[0], strerror(errno));   
+    }
+
+    else {
+        //wait for all children processes to finish
+        int status;
+        waitpid(zip_pid, &status, 0);
+
+        if (status < 0) {
+            fprintf(stderr, "%s: waipid error: %s\n", argv[0], strerror(errno));
             return EXIT_FAILURE;
         }
     }
