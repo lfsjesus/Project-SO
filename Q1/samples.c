@@ -23,13 +23,14 @@ int main(int argc, char* argv[]) {
     fseek(file, 0, SEEK_SET); // seek back to beginning of file
 
     srandom(0); // seed random number generator
+    
     for (unsigned i = 0; i < atoi(argv[2]); i++) {
-        int rand = random() % size; // get random number between 0 and size
+        int rand = random() % size; 
         fseek(file, rand * sizeof(char), SEEK_SET); // seek to random position
         fread (fragment, sizeof(char), atoi(argv[3]), file); // read maxfragsize bytes to fragment
 
         for (unsigned j = 0; j < atoi(argv[3]); j++) {
-            if (fragment[j] < ' ' || fragment[j] > '~')  // check if fragment contains non-printable characters
+            if (fragment[j] < ' ')  // remove non printable chars
                 fragment[j] = ' ';     
         }
 

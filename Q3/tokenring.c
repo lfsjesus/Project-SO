@@ -17,10 +17,11 @@ int main (int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    float p = atof(argv[2]); // probability
+    float p = atof(argv[2]) * 100; // probability
 
-    char* mem_loc = (char*)malloc(50*sizeof(char)); // allocate memory for 50 characters
+    char* mem_loc = (char*)malloc ((7 + 2* strlen(argv[1])) * sizeof(char)); // memory allocation
 
+    /* Creating Pipes */
     for (int i = 1; i <= atoi(argv[1]); i++) { 
         if (i == atoi(argv[1])) { // if last process
             sprintf(mem_loc, "pipe%dto1", i);
@@ -39,10 +40,13 @@ int main (int argc, char* argv[]) {
     free(mem_loc); // free memory
     
 
-    char* writing = (char*) malloc (50 * sizeof(char));
-    char* reading = (char*) malloc (50 * sizeof(char));
-
+    char* writing = (char*)malloc ((7 + 2 * strlen(argv[1])) * sizeof(char));
+    char* reading = (char*)malloc ((7 + 2 * strlen(argv[1])) * sizeof(char));
+    int token = 0;
+    int fd[2];
     pid_t pid[atoi(argv[1])]; // array of pids
+
+    /* Create Processes */
     for (int i = 1; i <= atoi(argv[1]); i++) {
         pid[i - 1] = fork(); // fork a child process for each process
 
@@ -51,25 +55,11 @@ int main (int argc, char* argv[]) {
             return EXIT_FAILURE;
         }
         else if (pid[i - 1] == 0) {
-            if (i == 1) { // if first process
+
+            if (i == 1) {  
                 sprintf(writing, "pipe%dto%d", i, i + 1); //sprintf because we need to write to a "string"
                 sprintf(reading, "pipe%dto1", atoi(argv[1]));
-            }
-            else if (i == atoi(argv[1])) { // if last process
-                sprintf(writing, "pipe%dto1", i); // closes the ring
-                sprintf(reading, "pipe%dto%d", i - 1, i);
-            }
-            else { // if not first or last process
-                sprintf(writing, "pipe%dto%d", i, i + 1);
-                sprintf(reading, "pipe%dto%d", i - 1, i);
-            }
-            
-            
-            // send a token to next process
-            int fd[2];
-            int token = 0;
-
-            if (i == 1) { 
+                
                 fd[WRITE_END] = open(writing, O_WRONLY); // open write end of pipe
                 if (fd[WRITE_END] < 0) {
                     fprintf(stderr, "%s: error opening write end of pipe %s\n", argv[0], strerror(errno));
@@ -81,10 +71,19 @@ int main (int argc, char* argv[]) {
                     return EXIT_FAILURE;
                 }
                 token++;
-                close(fd[WRITE_END]); // close write end of pipe because we are done writing
+                close(fd[WRITE_END]);
             }
 
-            srand(i); // seed random number generator
+            else if (i == atoi(argv[1])) { // if last process
+                sprintf(writing, "pipe%dto1", i); // closes the ring
+                sprintf(reading, "pipe%dto%d", i - 1, i);
+            }
+            else { // if not first or last process
+                sprintf(writing, "pipe%dto%d", i, i + 1);
+                sprintf(reading, "pipe%dto%d", i - 1, i);
+            }
+
+            srand(i); 
             while (1) {
                 //receive token from previous process
                 fd[READ_END] = open(reading, O_RDONLY); // open read end of pipe
@@ -139,4 +138,6 @@ int main (int argc, char* argv[]) {
             return EXIT_FAILURE;
         }
     }
+
+    return EXIT_SUCCESS;
 }

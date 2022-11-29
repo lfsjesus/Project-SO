@@ -63,7 +63,7 @@ int main (int argc, char* argv[]) {
     }
     
     else if (zip_pid == 0) {
-        char* zip[argc + 4];
+        char* zip[argc + 4]; 
         zip[0] = "zip"; // command to use in execvp
         zip[1] = "ebooks.zip";
 
