@@ -46,7 +46,7 @@ int main (int argc, char* argv[]) {
     int fd[2];
     pid_t pid[atoi(argv[1])]; // array of pids
 
-    /* Create Processes */
+    /* n processes */
     for (int i = 1; i <= atoi(argv[1]); i++) {
         pid[i - 1] = fork(); // fork a child process for each process
 
@@ -60,7 +60,11 @@ int main (int argc, char* argv[]) {
                 sprintf(writing, "pipe%dto%d", i, i + 1); //sprintf because we need to write to a "string"
                 sprintf(reading, "pipe%dto1", atoi(argv[1]));
                 
-                fd[WRITE_END] = open(writing, O_WRONLY); // open write end of pipe
+                /*
+                * Deadlock prevention by making sure that the first process has the token
+                */
+
+                fd[WRITE_END] = open(writing, O_WRONLY);
                 if (fd[WRITE_END] < 0) {
                     fprintf(stderr, "%s: error opening write end of pipe %s\n", argv[0], strerror(errno));
                     return EXIT_FAILURE;
@@ -83,7 +87,7 @@ int main (int argc, char* argv[]) {
                 sprintf(reading, "pipe%dto%d", i - 1, i);
             }
 
-            srand(i); 
+            srand(getpid()); 
             while (1) {
                 //receive token from previous process
                 fd[READ_END] = open(reading, O_RDONLY); // open read end of pipe
@@ -97,7 +101,7 @@ int main (int argc, char* argv[]) {
                     fprintf(stderr, "%s: error reading from pipe %s\\n", argv[0], strerror(errno));
                     return EXIT_FAILURE;
                 }
-                close(fd[READ_END]); // close read end of pipe because we are done reading
+                close(fd[READ_END]);
                 token++; // increment because we have received the token
             
 
@@ -114,7 +118,7 @@ int main (int argc, char* argv[]) {
                 }
                 
                 // send token to next process
-                fd[WRITE_END] = open(writing, O_WRONLY); // open write end of pipe
+                fd[WRITE_END] = open(writing, O_WRONLY); 
                 if (fd[WRITE_END] < 0) {
                     fprintf(stderr, "%s: error opening write end of pipe %s\\n", argv[0], strerror(errno));
                     return EXIT_FAILURE;
@@ -124,7 +128,7 @@ int main (int argc, char* argv[]) {
                     fprintf(stderr, "%s: error writing to pipe %s\n", argv[0], strerror(errno));
                     return EXIT_FAILURE;
                 }
-                close(fd[WRITE_END]); // close write end of pipe because we are done writing
+                close(fd[WRITE_END]); 
             }
             return EXIT_SUCCESS;
         }

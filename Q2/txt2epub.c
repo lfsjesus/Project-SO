@@ -22,7 +22,6 @@ int main (int argc, char* argv[]) {
     }
     
 
-
     pid_t pid[argc - 1];  // array of pids 
     for (int i = 1; i < argc; i++) { // loop through all files
         pid[i - 1] = fork(); // fork a child process for each file

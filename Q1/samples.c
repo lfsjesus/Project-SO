@@ -24,18 +24,21 @@ int main(int argc, char* argv[]) {
 
     srandom(0); // seed random number generator
     
-    for (unsigned i = 0; i < atoi(argv[2]); i++) {
+    for (int i = 0; i < atoi(argv[2]); i++) {
         int rand = random() % size; 
+
         fseek(file, rand * sizeof(char), SEEK_SET); // seek to random position
         fread (fragment, sizeof(char), atoi(argv[3]), file); // read maxfragsize bytes to fragment
 
-        for (unsigned j = 0; j < atoi(argv[3]); j++) {
-            if (fragment[j] < ' ')  // remove non printable chars
-                fragment[j] = ' ';     
+        // Remove non printable characters
+        for (int j = 0; j < atoi(argv[3]); j++) {
+            if (fragment[j] < 32 || fragment[j] > 126) {
+                fragment[j] = ' ';
+            }
         }
-
-    printf(">%s<\n", fragment);
-    fseek(file, 0, SEEK_SET); // reset file pointer to beginning of file
+        
+        printf(">%s<\n", fragment);
+        fseek(file, 0, SEEK_SET); // reset file pointer to beginning of file
 
     } 
     fclose(file);
