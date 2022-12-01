@@ -18,8 +18,20 @@ int main (int argc, char* argv[]) {
     }
 
     // Error if just one process
-    if (atoi(argv[1]) == 1) {
+    if (atoi(argv[1]) < 2) {
         fprintf(stderr, "%s error: Must have more than one process", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    // Error if probability is not between 0 and 1
+    if (atof(argv[2]) < 0 || atof(argv[2]) > 1) {
+        fprintf(stderr, "%s error: Probability must be between 0 and 1", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    // Error if delay is negative
+    if (atoi(argv[3]) < 0) {
+        fprintf(stderr, "%s error: Delay must be positive", argv[0]);
         return EXIT_FAILURE;
     }
 

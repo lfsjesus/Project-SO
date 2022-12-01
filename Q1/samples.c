@@ -9,6 +9,18 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
+    // Error if numberfrags is not positive
+    if (atoi(argv[2]) < 0) {
+        fprintf(stderr, "%s: numberfrags must be positive\n", argv[0]);
+        return EXIT_FAILURE;
+    }   
+
+    // Error if maxfragsize is not positive
+    if (atoi(argv[3]) <= 0) {
+        fprintf(stderr, "%s: maxfragsize must be positive\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
     FILE* file = fopen(argv[1], "r");
 
     if (file == NULL) {
@@ -20,7 +32,7 @@ int main(int argc, char* argv[]) {
     int rand;
 
     fseek(file, 0, SEEK_END); // seek to end of file to be able to use ftell
-    unsigned size = ftell(file)/sizeof(char); 
+    int size = ftell(file)/sizeof(char); 
     fseek(file, 0, SEEK_SET); // seek back to beginning of file
 
     int* already_used = (int*) malloc (size * sizeof(int));
