@@ -17,6 +17,12 @@ int main (int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
+    // Error if just one process
+    if (atoi(argv[1]) == 1) {
+        fprintf(stderr, "%s error: Must have more than one process", argv[0]);
+        return EXIT_FAILURE;
+    }
+
     float p = atof(argv[2]) * 100; // probability
 
     char* mem_loc = (char*)malloc ((7 + 2* strlen(argv[1])) * sizeof(char)); // memory allocation
