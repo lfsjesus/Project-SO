@@ -25,10 +25,11 @@ int main (int argc, char* argv[]) {
 
     float p = atof(argv[2]) * 100; // probability
 
-    char* mem_loc = (char*)malloc ((7 + 2* strlen(argv[1])) * sizeof(char)); // memory allocation
+    char* mem_loc = (char*)malloc ((7 + 2 * strlen(argv[1])) * sizeof(char)); 
 
     /* Creating Pipes */
     for (int i = 1; i <= atoi(argv[1]); i++) { 
+
         if (i == atoi(argv[1])) { // if last process
             sprintf(mem_loc, "pipe%dto1", i);
         }
@@ -36,21 +37,21 @@ int main (int argc, char* argv[]) {
             sprintf(mem_loc, "pipe%dto%d", i, i + 1);
         }
 
-        int pipe = mkfifo(mem_loc, 0666); // create named pipe with read/write permissions for all users
+        int pipe = mkfifo(mem_loc, 0666); // create named pipe with read/write permission
 
         if (pipe < 0) {
             fprintf(stderr, "%s: error creating named pipe %s\n", argv[0], strerror(errno));
             return EXIT_FAILURE;
         }
     }
-    free(mem_loc); // free memory
+    free(mem_loc); 
     
 
     char* writing = (char*)malloc ((7 + 2 * strlen(argv[1])) * sizeof(char));
     char* reading = (char*)malloc ((7 + 2 * strlen(argv[1])) * sizeof(char));
     int token = 0;
     int fd[2];
-    pid_t pid[atoi(argv[1])]; // array of pids
+    pid_t pid[atoi(argv[1])]; // array of pids por  n processes
 
     /* n processes */
     for (int i = 1; i <= atoi(argv[1]); i++) {
@@ -63,7 +64,7 @@ int main (int argc, char* argv[]) {
         else if (pid[i - 1] == 0) {
 
             if (i == 1) {  
-                sprintf(writing, "pipe%dto%d", i, i + 1); //sprintf because we need to write to a "string"
+                sprintf(writing, "pipe%dto%d", i, i + 1); 
                 sprintf(reading, "pipe%dto1", atoi(argv[1]));
                 
                 /*
@@ -96,8 +97,7 @@ int main (int argc, char* argv[]) {
             srand(getpid()); 
             while (1) {
                 //receive token from previous process
-                fd[READ_END] = open(reading, O_RDONLY); // open read end of pipe
-
+                fd[READ_END] = open(reading, O_RDONLY); 
                 if (fd[READ_END] < 0) {
                     fprintf(stderr, "%s: error opening read end of pipe %s\\n", argv[0], strerror(errno));
                     return EXIT_FAILURE;
@@ -111,7 +111,7 @@ int main (int argc, char* argv[]) {
                 token++; // increment because we have received the token
             
 
-                // probability of sending token to next process
+                // probability of locking
                 int prob = (rand() % 100); // random number between 0 and 99
 
                 if (prob < p) { 

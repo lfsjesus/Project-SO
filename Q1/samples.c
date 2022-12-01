@@ -33,6 +33,7 @@ int main(int argc, char* argv[]) {
     srandom(0); // seed random number generator
     
     for (int i = 0; i < atoi(argv[2]); i++) {
+        
         //ensures that the same fragment is not chosen twice
         do { 
             rand = random() % size;
